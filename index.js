@@ -20,18 +20,26 @@ app.get("/", function (req, res) {
 
 // your first API endpoint...
 app.get("/api/:date", function (req, res) {
-  const myRegex = /[-]/g;
-  let time;
-  let data;
-  myRegex.test(req.params.date)
-    ? ((time = req.params.date.split("-")),
-      (data = new Date(
-        Date.UTC(Number(time[0]), Number(time[1]) - 1, Number(time[2]))
-      )))
-    : (data = new Date(Date.UTC(Number(req.params.date))));
-
+  let date = req.params.date;
+  if (date.match(/\d{5,}/g)) {
+    date = +date;
+  }
+  let data = new Date(date);
+  if (data.toUTCString() == "Invalid Date") {
+    res.json({
+      error: "Invalid Date",
+    });
+  } else {
+    res.json({
+      unix: data.valueOf(),
+      utc: data.toUTCString(),
+    });
+  }
+});
+app.get("/api/", (req, res) => {
+  let data = new Date();
   res.json({
-    unix: data.getTime(),
+    unix: data.valueOf(),
     utc: data.toUTCString(),
   });
 });
